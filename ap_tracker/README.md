@@ -172,3 +172,109 @@ This project demonstrates backend skills in:
 - Authentication & authorization
 - Secure multi-user data handling
 
+
+
+
+
+### WEEK 2
+
+# What was added
+
+1. Daily Protein Targets (per user)
+- Users can create, view, update, and delete a protein target for a specific date.
+- Only one target per user per date is allowed (database constraint).
+
+2. Intake Summaries (per user)
+- Stores daily totals of protein intake alongside the target for that day.
+- Only one summary per user per date is allowed.
+
+# Ownership and Security
+
+- All records are automatically linked to the logged-in user.
+- Users cannot see or modify other users’ data.
+- The user field is read-only and set using request.user.
+- Requests for another user’s data return 404 Not Found.
+
+# Daily Summary Generator
+
+Endpoint:
+POST /api/summaries/generate/?date=YYYY-MM-DD
+
+This endpoint:
+- Validates the date
+- Calculates total protein consumed that day from ProteinIntake
+- Retrieves the user’s DailyProteinTarget for the same date
+- Creates or updates the IntakeSummary for that day
+
+Behavior
+- Returns 200 OK with the summary
+- Returns 400 if the date is missing or invalid
+- Returns 404 if no target exists for that date
+- Uses update-or-create so repeated calls don’t create duplicates
+
+Why this design
+- Database constraints ensure one target and one summary per day
+- Server-side aggregation keeps calculations accurate and consistent
+- Idempotent generation makes the endpoint safe to call multiple times
+- Per-user scoping ensures full data isolation
+
+What the system now supports
+- Log daily protein intake
+- Set daily protein targets
+- Generate daily intake vs. target summaries
+- Secure, RESTful, user-isolated data management
+
+This completes the core tracking workflow defined in the ERD.
+
+
+### Key Improvements
+1. User Profile Management
+- Added /api/me/ endpoint.
+- Users can view their profile and update weight_kg.
+- Username and email remain read-only for safety.
+
+2. Automatic Daily Targets
+- Daily targets are now calculated automatically using:
+   * target_grams = weight_kg × 0.8
+- Users no longer provide target_grams.
+- If weight is not set, the API returns 400 Bad Request.
+
+3. JWT Authentication
+- Added token-based authentication for Postman, mobile, or frontend use.
+- Users obtain a token via /api/token/ and include it in requests.
+- Session authentication still works for browser testing.
+
+4. Date Filtering
+- Intake records can be filtered:
+   * By single date
+   * By date range
+- Invalid formats return 400.
+
+5. Protein Source Security
+- All authenticated users can read protein sources.
+- Only admin users can create, update, or delete them.
+- Non-admin write attempts return 403 Forbidden.
+
+6. Data Validation
+- weight_kg must be greater than 0.
+- protein_quantity_grams must be greater than 0.
+- Invalid values return 400 Bad Request.
+
+# Recommended Usage Flow
+1. Authenticate (JWT or session)
+2. Set weight via /api/me/
+3. Create daily target (auto-calculated)
+4. Log protein intake
+5. Generate daily summary
+6. Retrieve summary for the date
+
+# Result
+- The API now provides:
+- User-driven profile management
+- Consistent server-side calculations
+- Secure per-user data access
+- Practical querying and filtering
+- Admin-controlled reference data
+- Production-ready authentication and validation
+
+This completes a full end-to-end protein tracking workflow.

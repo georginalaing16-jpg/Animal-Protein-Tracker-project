@@ -28,3 +28,32 @@ class ProteinIntake(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
 
 
+
+from django.db import models
+from django.conf import settings
+
+class DailyProteinTarget(models.Model):
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="daily_targets")
+    target_grams = models.DecimalField(max_digits=5, decimal_places=2)
+    target_date = models.DateField()
+    calculation_method = models.CharField(max_length=50)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        # Prevent duplicate targets for the same user + same date
+        constraints = [
+            models.UniqueConstraint(fields=["user", "target_date"], name="unique_target_per_user_per_date")
+        ]
+
+
+class IntakeSummary(models.Model):
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="intake_summaries")
+    summary_date = models.DateField()
+    total_protein_grams = models.DecimalField(max_digits=5, decimal_places=2)
+    target_protein_grams = models.DecimalField(max_digits=5, decimal_places=2)
+
+    class Meta:
+        # One summary per day per user
+        constraints = [
+            models.UniqueConstraint(fields=["user", "summary_date"], name="unique_summary_per_user_per_date")
+        ]
