@@ -51,3 +51,15 @@ class MeSerializer(serializers.ModelSerializer):
             if value is not None and value <= 0:
                 raise serializers.ValidationError("weight_kg must be greater than 0.")
             return value
+        
+
+class RegisterSerializer(serializers.ModelSerializer):
+    password = serializers.CharField(write_only=True, min_length=8)
+
+    class Meta:
+        model = User
+        fields = ["id", "username", "email", "password", "weight_kg"]
+        read_only_fields = ["id"]
+
+    def create(self, validated_data):
+        return User.objects.create_user(**validated_data)
