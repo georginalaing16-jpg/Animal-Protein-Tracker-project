@@ -1,6 +1,7 @@
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
 from django.contrib.auth import get_user_model
+from .models import AnimalProteinSource, ProteinIntake, DailyProteinTarget, IntakeSummary
 
 User = get_user_model()
 
@@ -18,3 +19,8 @@ class UserAdmin(BaseUserAdmin):
     add_fieldsets = BaseUserAdmin.add_fieldsets + (
         ("Health Info", {"fields": ("weight_kg",)}),
     )
+
+admin.site.register(AnimalProteinSource)
+admin.site.register(ProteinIntake)
+admin.site.register(DailyProteinTarget)
+admin.site.register(IntakeSummary)
